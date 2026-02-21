@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Shop — Euly's Creation01</title>
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="container topbar-inner">
+      <div class="left">
+        <span>📞 <strong>(876) 892-9581</strong></span>
+        <span class="slogan">Expressing yourself through us.</span>
+      </div>
+      <div class="right">
+        <a href="https://www.instagram.com/eulyscreation01" target="_blank" rel="noopener">Instagram: @eulyscreation01</a>
+        <a href="https://www.tiktok.com/@eulyscreation01" target="_blank" rel="noopener">TikTok: @eulyscreation01</a>
+      </div>
+    </div>
+  </div>
+
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="brand">
+        <img src="assets/logo.jpg" alt="Euly's Creation01 logo" class="logo" />
+        <div class="brand-text">
+          <div class="brand-title">Euly's Creation01</div>
+          <div class="brand-sub">Personalized Gifts • Prints • Apparel</div>
+        </div>
+      </a>
+      <nav class="nav">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="shop.html">Shop</a>
+        <a href="contact.html">Contact</a>
+        <button id="cartButton" class="cart-button" aria-label="Open cart">🛒 <span id="cartCount">0</span></button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container section">
+    <h2>Shop</h2>
+    <div id="productsGrid" class="products-grid" aria-live="polite"></div>
+  </main>
+
+  <aside id="cartDrawer" class="cart-drawer" aria-hidden="true" aria-labelledby="cartTitle" role="dialog">
+    <div class="cart-header">
+      <h3 id="cartTitle">Your Cart</h3>
+      <button id="closeCart" class="icon-button" aria-label="Close cart">✕</button>
+    </div>
+    <div id="cartItems" class="cart-items"></div>
+    <div class="cart-footer">
+      <div class="totals"><span>Subtotal:</span> <strong id="cartSubtotal">J$0.00</strong></div>
+      <button id="checkoutButton" class="btn-primary">Checkout</button>
+    </div>
+  </aside>
+
+  <div id="checkoutModal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="checkoutTitle">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="checkoutTitle">Checkout</h3>
+        <button id="closeCheckout" class="icon-button" aria-label="Close checkout">✕</button>
+      </div>
+      <form id="checkoutForm" class="form-grid">
+        <label>Full name<input type="text" name="name" required /></label>
+        <label>Email<input type="email" name="email" required /></label>
+        <label>Phone (WhatsApp preferred)<input type="tel" name="phone" required /></label>
+        <label class="full">Delivery method
+          <select name="delivery" required>
+            <option value="Pickup">Pickup</option>
+            <option value="Delivery">Delivery</option>
+            <option value="Knutsford">Knutsford Express</option>
+          </select>
+        </label>
+        <label class="full">Address / Pickup preference<textarea name="address" rows="2"></textarea></label>
+        <label class="full">Notes<textarea name="notes" rows="3"></textarea></label>
+        <div class="modal-actions">
+          <button type="button" id="cancelCheckout" class="btn-secondary">Cancel</button>
+          <button type="submit" class="btn-primary">Email my order</button>
+        </div>
+      </form>
+      <div id="checkoutStatus" class="status" hidden></div>
+    </div>
+  </div>
+
+  <footer class="site-footer"><div class="container footer-inner"><small>© <span id="year"></span> Euly's Creation01</small></div></footer>
+  <script>document.getElementById('year').textContent=new Date().getFullYear()</script>
+  <script src="products.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

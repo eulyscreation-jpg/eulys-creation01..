@@ -1,0 +1,79 @@
+
+const SHOP_EMAIL = 'eulyscreation@gmail.com';
+const fmt = new Intl.NumberFormat('en-JM', { style:'currency', currency:'JMD', maximumFractionDigits:0 });
+const productsGrid = document.getElementById('productsGrid');
+const cartButton = document.getElementById('cartButton');
+const cartDrawer = document.getElementById('cartDrawer');
+const closeCart = document.getElementById('closeCart');
+const cartItemsEl = document.getElementById('cartItems');
+const cartSubtotalEl = document.getElementById('cartSubtotal');
+const cartCountEl = document.getElementById('cartCount');
+const checkoutButton = document.getElementById('checkoutButton');
+const checkoutModal = document.getElementById('checkoutModal');
+const closeCheckout = document.getElementById('closeCheckout');
+const cancelCheckout = document.getElementById('cancelCheckout');
+const checkoutForm = document.getElementById('checkoutForm');
+const checkoutStatus = document.getElementById('checkoutStatus');
+let CART = [];
+
+function productCard(product){
+  const card=document.createElement('div'); card.className='product-card';
+  const media=document.createElement('div'); media.className='product-media';
+  const img=document.createElement('img'); img.src=product.image; img.alt=product.name; media.appendChild(img); card.appendChild(media);
+  const body=document.createElement('div'); body.className='product-body';
+  const title=document.createElement('div'); title.className='product-title'; title.textContent=product.name;
+  const desc=document.createElement('div'); desc.className='product-desc'; desc.textContent=product.description||'';
+  body.appendChild(title); if(product.description) body.appendChild(desc);
+  const actions=document.createElement('div'); actions.className='product-actions';
+  let price=product.price || (product.variants?.[0]?.price ?? 0);
+  let variantSelect,sizeSelect,typeSelect;
+  if(product.variants){ variantSelect=document.createElement('select'); product.variants.forEach(v=>{const o=document.createElement('option'); o.value=v.name; o.textContent=`${v.name} — ${fmt.format(v.price)}`; variantSelect.appendChild(o);}); actions.appendChild(variantSelect); variantSelect.addEventListener('change',()=>{ const v=product.variants.find(x=>x.name===variantSelect.value); price=v.price; priceEl.textContent=fmt.format(price);}); }
+  if(product.variantSets){ const [sizeSet,typeSet]=product.variantSets; const row=document.createElement('div'); row.className='row'; sizeSelect=document.createElement('select'); sizeSet.options.forEach(s=>{const o=document.createElement('option'); o.value=s; o.textContent=s; sizeSelect.appendChild(o);}); typeSelect=document.createElement('select'); typeSet.options.forEach(o=>{const el=document.createElement('option'); el.value=o.label; el.textContent=`${o.label} — ${fmt.format(o.price)}`; typeSelect.appendChild(el);}); row.appendChild(sizeSelect); row.appendChild(typeSelect); actions.appendChild(row); typeSelect.addEventListener('change',()=>{ const t=typeSet.options.find(x=>x.label===typeSelect.value); price=t.price; priceEl.textContent=fmt.format(price);}); price=typeSet.options[0].price; }
+  const qtyRow=document.createElement('div'); qtyRow.className='row'; const qty=document.createElement('input'); qty.type='number'; qty.min='1'; qty.value='1'; const addBtn=document.createElement('button'); addBtn.className='btn-primary'; addBtn.textContent='Add to cart'; qtyRow.appendChild(qty); qtyRow.appendChild(addBtn);
+  const priceEl=document.createElement('div'); priceEl.className='price'; priceEl.textContent=fmt.format(price);
+  actions.appendChild(priceEl); actions.appendChild(qtyRow); body.appendChild(actions); card.appendChild(body);
+  addBtn.addEventListener('click',()=>{ const quantity=Math.max(1,parseInt(qty.value||'1',10)); const meta={}; let unitPrice=price; if(variantSelect){ meta['Variant']=variantSelect.value; unitPrice=product.variants.find(x=>x.name===variantSelect.value).price; } if(sizeSelect && typeSelect){ meta['Size']=sizeSelect.value; meta['Shirt Type']=typeSelect.value; unitPrice=product.variantSets[1].options.find(x=>x.label===typeSelect.value).price; }
+    const item={ id:product.id+'|'+JSON.stringify(meta), name:product.name, image:product.image, meta, unitPrice, quantity, total:unitPrice*quantity };
+    const existing=CART.find(x=>x.id===item.id);
+    if(existing){ existing.quantity+=quantity; existing.total=existing.unitPrice*existing.quantity; }
+    else CART.push(item);
+    renderCart(); cartDrawer.classList.add('open'); cartDrawer.setAttribute('aria-hidden','false'); });
+  return card; }
+
+function renderProducts(){ if(!productsGrid) return; productsGrid.replaceChildren(); PRODUCTS.forEach(p=>productsGrid.appendChild(productCard(p))); }
+function renderCart(){ if(!cartItemsEl) return; cartItemsEl.replaceChildren(); let subtotal=0; CART.forEach((item,idx)=>{ subtotal+=item.total; const el=document.createElement('div'); el.className='cart-item';
+    const left=document.createElement('div'); const title=document.createElement('div'); title.className='cart-item-title'; title.textContent=item.name; const meta=document.createElement('div'); meta.className='cart-item-meta'; meta.textContent=Object.entries(item.meta).map(([k,v])=>`${k}: ${v}`).join(' · ') || '—'; left.appendChild(title); left.appendChild(meta);
+    const right=document.createElement('div'); right.className='cart-item-controls'; const minus=document.createElement('button'); minus.className='icon-button'; minus.textContent='−'; const qty=document.createElement('span'); qty.textContent=' '+item.quantity+' '; const plus=document.createElement('button'); plus.className='icon-button'; plus.textContent='+'; const price=document.createElement('div'); price.style.minWidth='80px'; price.style.textAlign='right'; price.textContent=fmt.format(item.total);
+    const remove=document.createElement('button'); remove.className='icon-button'; remove.textContent='🗑️'; remove.title='Remove';
+    minus.addEventListener('click',()=>{ item.quantity=Math.max(1,item.quantity-1); item.total=item.unitPrice*item.quantity; renderCart();});
+    plus.addEventListener('click',()=>{ item.quantity+=1; item.total=item.unitPrice*item.quantity; renderCart();});
+    remove.addEventListener('click',()=>{ CART=CART.filter((_,i)=>i!==idx); renderCart();});
+    right.appendChild(minus); right.appendChild(qty); right.appendChild(plus); right.appendChild(remove); right.appendChild(price);
+    el.appendChild(left); el.appendChild(right); cartItemsEl.appendChild(el);});
+  cartSubtotalEl.textContent=fmt.format(subtotal); cartCountEl.textContent=CART.reduce((n,x)=>n+x.quantity,0); }
+
+if(cartButton) cartButton.addEventListener('click',()=>{ cartDrawer.classList.add('open'); cartDrawer.setAttribute('aria-hidden','false');});
+if(closeCart) closeCart.addEventListener('click',()=>{ cartDrawer.classList.remove('open'); cartDrawer.setAttribute('aria-hidden','true');});
+if(checkoutButton) checkoutButton.addEventListener('click',()=>{ if(!CART.length){ alert('Your cart is empty.'); return;} checkoutModal.classList.add('open'); checkoutModal.setAttribute('aria-hidden','false');});
+if(closeCheckout) closeCheckout.addEventListener('click',()=>{ checkoutModal.classList.remove('open'); checkoutModal.setAttribute('aria-hidden','true');});
+if(cancelCheckout) cancelCheckout.addEventListener('click',()=>{ checkoutModal.classList.remove('open'); checkoutModal.setAttribute('aria-hidden','true');});
+
+if(checkoutForm){ checkoutForm.addEventListener('submit',(e)=>{ e.preventDefault(); if(!CART.length){ alert('Your cart is empty.'); return; }
+  const data=Object.fromEntries(new FormData(checkoutForm).entries()); const subtotal=CART.reduce((n,x)=>n+x.total,0);
+  const lines = CART.map(it=>`• ${it.name} x${it.quantity} — J$${it.total.toLocaleString('en-JM')}
+   ${Object.entries(it.meta).map(([k,v])=>`${k}: ${v}`).join(' · ')}` ).join('
+');
+  const body = `Customer: ${data.name}
+Email: ${data.email}
+Phone: ${data.phone}
+Delivery: ${data.delivery}
+Address/Pickup: ${data.address||''}
+Notes: ${data.notes||''}
+
+Items:
+${lines}
+
+Subtotal: J$${subtotal.toLocaleString('en-JM')}`;
+  const subject = `New Order — ${data.name}`; const href=`mailto:${encodeURIComponent(SHOP_EMAIL)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`; window.location.href=href; checkoutStatus.hidden=false; checkoutStatus.textContent='Opening your email app to send the order…'; }); }
+
+renderProducts(); renderCart();
